@@ -96,14 +96,15 @@ module DarkSpace
     TSV.collapse_stream(dumper.stream)
   end
 
+  dep :pmid_coverage, :compute => :produce
   dep :pmid_tm_scores
-  dep :pmid_coverage
   task :pmid_tm_scores_db => :tsv do
+    pmid_coverage = step(:pmid_coverage).load
+
     pmid_tm_scores = step(:pmid_tm_scores).load
 
     pmid_tm_scores = pmid_tm_scores.to_list{|v| Misc.mean(v.collect{|v| v.nil? ? nil : v.to_f })}
 
-    pmid_coverage = step(:pmid_coverage).load
 
     pmid_tm_scores.monitor = true
     pmid_tm_scores.add_field "IMEX" do |pmid,values|
@@ -118,7 +119,7 @@ module DarkSpace
   end
 
   dep :pmid_tm_scores_db
-  task :pmid_tm_pred => :tsv do
+  task :pmid_tm_relevance => :tsv do
 
     require 'rbbt/util/R' 
 
@@ -136,20 +137,20 @@ m = randomForest(DB.Score ~ EPMC.PR + EPMC.DR + EVEX + STRING, d)
 p = predict(m,data)
 data = data.frame(p)
 rownames(data) <- names(p)
-names(data) <- c('Pred')
+names(data) <- c('Relevance')
     EOF
 
     pred
   end
 
-  dep :pmid_tm_pred
+  dep :pmid_coverage, :compute => :produce
+  dep :pmid_tm_relevance
   dep :pmid_proteins
-  dep :pmid_coverage
   dep :protein_evidence
   task :pmid_rank => :tsv do
-    scores = step(:pmid_tm_pred).load
-    pmid_proteins = step(:pmid_proteins).load
     pmid_coverage = step(:pmid_coverage).load
+    scores = step(:pmid_tm_relevance).load
+    pmid_proteins = step(:pmid_proteins).load
     protein_evidence = step(:protein_evidence).load
 
     scores.monitor = true
@@ -180,7 +181,7 @@ names(data) <- c('Pred')
         0
       else
         i = values["Protein interest"].to_f
-        p = values["Pred"].to_f
+        p = values["Relevance"].to_f
         c = values["Coverage"].to_f + 1
         i * p / c
       end
