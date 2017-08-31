@@ -164,14 +164,14 @@ names(data) <- c('Relevance')
     end
 
     scores.add_field "Proteins" do |pmid,values|
-      pmid_proteins[pmid].uniq
+      pmid_proteins[pmid]
     end
 
     scores.add_field "Protein interest" do |pmid,values|
       interest = values["Proteins"].collect{|protein|
         evidence = protein_evidence.include?(protein) ? protein_evidence[protein].last : []
 
-        1 / (1 + evidence.length)
+        1.0 / (1 + evidence.length)
       }
       Misc.sum(interest)
     end
