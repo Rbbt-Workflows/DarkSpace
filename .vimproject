@@ -1,11 +1,23 @@
-ruby=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass *.txt *.conf" {
+DarkSpace=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass *.txt *.conf" {
+ workflow.rb
+ doc=doc{
+  email.md
+ }
  bin=bin filter="*"{
  }
  lib=lib {
+  rbbt=rbbt{
+   sources=sources{
+    DarkSpace.rb
+   }
+  }
  }
  test=test {
   test_helper.rb
  }
  data=data filter="*"{
+  paircomp_table_final.txt.gz
+  pubcomp_table_final.txt.gz
+  pubpaircomp_table_final.txt.tar.gz
  }
 }

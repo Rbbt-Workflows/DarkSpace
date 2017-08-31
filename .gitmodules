@@ -1,0 +1,3 @@
+[submodule "modules/darkspaceproject"]
+	path = modules/darkspaceproject
+	url = https://github.com/pporrasebi/darkspaceproject.git
