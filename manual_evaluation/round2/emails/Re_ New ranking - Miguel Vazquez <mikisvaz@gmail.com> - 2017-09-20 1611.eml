@@ -1,0 +1,248 @@
+Return-Path: <mikisvaz@gmail.com>
+Received: from imap01.ebi.ac.uk ([unix socket])
+	 by imap01.ebi.ac.uk (Cyrus v2.3.16-Fedora-RPM-2.3.16-6.el6_2.5) with LMTPA;
+	 Wed, 20 Sep 2017 16:11:48 +0100
+X-Sieve: CMU Sieve 2.3
+Received: from smtp07.ebi.ac.uk (smtp07.ebi.ac.uk [193.62.196.50])
+	by imap01.ebi.ac.uk (8.14.4/8.14.4) with ESMTP id v8KFBm1c013261
+	for <pporras@imap01.ebi.ac.uk>; Wed, 20 Sep 2017 16:11:48 +0100
+Received: from hx-mx1.ebi.ac.uk (mx1.ebi.ac.uk [193.62.195.238])
+	by smtp07.ebi.ac.uk (8.13.8/8.13.8) with ESMTP id v8KFBmtt017001
+	for <pporras@ebi.ac.uk>; Wed, 20 Sep 2017 16:11:48 +0100
+Received: from hx-mx1.ebi.ac.uk (localhost.localdomain [127.0.0.1])
+	by localhost (Email Security Appliance) with SMTP id 2A42022DFD8_9C28534B
+	for <pporras@ebi.ac.uk>; Wed, 20 Sep 2017 15:11:48 +0000 (GMT)
+Received: from mail-it0-f49.google.com (mail-it0-f49.google.com [209.85.214.49])
+	(using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+	(Client CN "smtp.gmail.com", Issuer "Google Internet Authority G2" (verified OK))
+	by hx-mx1.ebi.ac.uk (Sophos Email Appliance) with ESMTPS id 4139022DF6B_9C28533F
+	for <pporras@ebi.ac.uk>; Wed, 20 Sep 2017 15:11:47 +0000 (GMT)
+Received: by mail-it0-f49.google.com with SMTP id 85so3376509ith.2
+        for <pporras@ebi.ac.uk>; Wed, 20 Sep 2017 08:11:47 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=mime-version:in-reply-to:references:from:date:message-id:subject:to;
+        bh=Jwy+r6/DAhRseI5u0i3X3lg/SYp32ZbqDdQQn6Cm6pY=;
+        b=A4jLhkvfwX6WJA34VfMlIVW7Jru7MXLKelp05cPauZJ6bYMujPOGbez8SH1MoUW5Sg
+         YXistrwxot3ckPSYG4sb92SaEkED6KmqmfGHjQeUymXceyOITCrHXXxTK/WSSI0+PRQi
+         pNCOju4Ul0cfSp9XyIWTHXEQtytVd8apfwFSxV8aXv/VkcL3/4ofU2ghG7BBmcTAgwda
+         jb6z81lkXB+321asDCdzBaAHqgtIv9EimfjrJS4mYm3/zRL0WLS2TQmPOQys7wMz86sL
+         qDEI0hgALcA6m/epfujH9cTR2Fs9uxkhFAFdpALnYIFsc9zCheci9dmyEqqnYhJzQnsU
+         hJTQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:in-reply-to:references:from:date
+         :message-id:subject:to;
+        bh=Jwy+r6/DAhRseI5u0i3X3lg/SYp32ZbqDdQQn6Cm6pY=;
+        b=g/FVJ6niLtCq+hsnRCaWGH/ZZDq7cuZAklmxsvXPkGAVNsDvvbflELh1utxicfRvFf
+         39E5Q0kIxINxMcGEywzLQHWw5NI/9tiYZFPNDu7N9fplmuyudRXUeDhVznw0MyWFTC2z
+         2K8jmkaunaMTmJo9hKFfe+E/eS+he2sCg9Oz6vao+IDHu46IDtfuSz65Pm1ER1U9hDKX
+         gaFwuikY4CH4jFforq2DuZRBWEWzPfuZAh52nupDwi2YdhH192EOA8dqYcalYdtP8zuV
+         EAHXJ7b/UqvJaqKcI36OcdmP8og73QL+LJjZPoT84yFZ3oRXi+FSt2mTrg4apxwAM9vn
+         VEtA==
+X-Gm-Message-State: AHPjjUiwS1Q9BzdTf3SywtUMH/gTtGoSBW0A1Cixfw1s6O3aAW2ZagtT
+	V5+FZJmlv7hwBJto2k4G9YIaR05N9hl9FBrfT0s=
+X-Google-Smtp-Source: AOwi7QDcXVbiId80PbjCKXnj30WqPkL5/XSVEJfFH9zPEDA1QOkp3xxQm4Oxw+mFL/8XvV3DXq7Ed5pKjVyIcmCgSnc=
+X-Received: by 10.36.210.67 with SMTP id z64mr3632668itf.122.1505920305841;
+ Wed, 20 Sep 2017 08:11:45 -0700 (PDT)
+MIME-Version: 1.0
+Received: by 10.79.108.68 with HTTP; Wed, 20 Sep 2017 08:11:25 -0700 (PDT)
+In-Reply-To: <9fd53bc4-657f-b3e0-7cb5-257b7ac88da4@ebi.ac.uk>
+References: <CA+dx8mZHYum=-m2CO30dv2j4VnXeUSGY14N8WH0Hj01aj2hXLw@mail.gmail.com>
+ <9fd53bc4-657f-b3e0-7cb5-257b7ac88da4@ebi.ac.uk>
+From: Miguel Vazquez <mikisvaz@gmail.com>
+Date: Wed, 20 Sep 2017 17:11:25 +0200
+Message-ID: <CA+dx8mZ8GGnHS_RVcptfNXyjXnuvKMpwkAZkun=+K+BKERTaTg@mail.gmail.com>
+Subject: Re: New ranking
+To: Pablo Porras <pporras@ebi.ac.uk>
+Content-Type: multipart/alternative; boundary="94eb2c05d378e3ec9c0559a064a9"
+X-Sophos-SenderHistory: ip=209.85.214.49,fs=0,da=75571476,mc=1,sc=0,hc=1,sp=0,fso=42139289,re=316,sd=0,hd=0
+X-Sophos-ESA: [hx-mx1.ebi.ac.uk] 4.2.1.1, Antispam-Engine: 2.7.2.2107409, Antispam-Data: 2017.9.20.150315
+X-SEA-Spam: Gauge=IIIIIIII, Probability=8%, Report='
+ LEO_OBFU_SUBJ_RE 0.1, SUPERLONG_LINE 0.05, BODYTEXTH_SIZE_10000_LESS 0, BODYTEXTH_SIZE_3000_MORE 0, BODYTEXTP_SIZE_3000_LESS 0, DKIM_SIGNATURE 0, DQ_S_H 0, IN_REP_TO 0, LEGITIMATE_SIGNS 0, MSG_THREAD 0, NO_URI_HTTPS 0, REFERENCES 0, SPF_PASS 0, WEBMAIL_SOURCE 0, __ANY_URI 0, __BOUNCE_CHALLENGE_SUBJ 0, __BOUNCE_NDR_SUBJ_EXEMPT 0, __CP_URI_IN_BODY 0, __CT 0, __CTYPE_HAS_BOUNDARY 0, __CTYPE_MULTIPART 0, __CTYPE_MULTIPART_ALT 0, __DQ_IP_FSO_LARGE 0, __DQ_IP_FS_1K 0, __DQ_IP_HIST 0, __DQ_NEG_HEUR 0, __DQ_NEG_IP 0, __DQ_S_HIST_1 0, __DQ_S_HIST_2 0, __DQ_S_IP_MC_1 0, __FORWARDED_MSG 0, __FRAUD_CONTACT_NUM 0, __FRAUD_WEBMAIL 0, __FRAUD_WEBMAIL_FROM 0, __FROM_GMAIL 0, __HAMMY_DAYS_0 0, __HAS_FROM 0, __HAS_HTML 0, __HAS_MSGID 0, __HELO_GMAIL 0, __HEX28_LC_BOUNDARY 0, __HTML_AHREF_TAG 0, __HTML_TAG_DIV 0, __IN_REP_TO 0, __MIME_HTML 0, __MIME_TEXT_H 0, __MIME_TEXT_H1 0, __MIME_TEXT_H2 0,
+ __MIME_TEXT_P 0, __MIME_TEXT_P1 0, __MIME_TEXT_P2 0, __MIME_VERSION 0, __MULTIPLE_URI_TEXT 0, __PHISH_SPEAR_HTTP_RECEIVED 0, __PHISH_SPEAR_STRUCTURE_1 0, __RATWARE_SIGNATURE_3_N1 0, __RDNS_GMAIL 0, __REFERENCES 0, __SANE_MSGID 0, __SUBJ_ALPHA_END 0, __SUBJ_ALPHA_NEGATE 0, __TO_MALFORMED_2 0, __TO_NAME 0, __TO_NAME_DIFF_FROM_ACC 0, __TO_REAL_NAMES 0, __URI_IN_BODY 0, __URI_NOT_IMG 0, __URI_NS , __URI_WITHOUT_PATH 0, __URI_WITH_PATH 0, __YOUTUBE_RCVD 0'
+
+--94eb2c05d378e3ec9c0559a064a9
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Wed, Sep 20, 2017 at 4:50 PM, Pablo Porras <pporras@ebi.ac.uk> wrote:
+
+> Hi Miguel,
+>
+> Thanks a lot for the update, I have a couple of questions so I can put it
+> in context.
+>
+> So, if I understood right, this list only contains those PMIDs where text
+> mining triplets, taken from EVEx; EuroPMC and STRING, overlap with the
+> pathway/interaction resources listed in the second point. Is that so?
+>
+
+Not exactly. To be more precise the PMIDs are those that have TM triplets.
+The only proteins considered for importance for a PMID are those for which
+the same protein was associated with that PMID in pathway databases. The
+triplet in itself does not necessary have to be in the database, but the
+protein was found by the database in that PMID. You will see PMIDs with no
+associated proteins, because there is no overlap between proteins in TM
+triplets and proteins in database entries.
+
+
+
+>
+> Also, you are still using all pathway databases as reference for a
+> 'positive' hit, and not using the predictions from IID or STRING, right?
+>
+
+What is IID? For coverage of a PMID, which weighs down score, I use all
+that is not TM. Perhaps I should not consider here STRING
+
+
+>
+> I will do some evaluation on the new results as soon as I can and come
+> back to you.
+>
+> Cheers,
+>
+> Pablo.
+>
+>
+> On 19/09/2017 16:59, Miguel Vazquez wrote:
+>
+>> Hi Pablo,
+>>
+>> I took the oportunity to have another go at our problem. Please find
+>> attached a new version of the ranking. It's based on the previous one wi=
+th
+>> the following differences.
+>>
+>> - For each PMID the proteins listed are only those that come from
+>> Text-Mining based predictions ie some TM method predicted that paper
+>> describes that protein as interacting with another
+>> - From the proteins above we only take those that are in triplets
+>> (PMID:Protein:Protein) described in one of the following resources:imex,
+>> reactome, BioGRID, GO_IPI, OmniPath_interactions, OmniPath_ptm, STRING_p=
+i,
+>> - Some PMID still have large numbers of proteins this is because both th=
+e
+>> TM methods predict many PPI and these are also used in the pathway
+>> databases above.
+>>
+>> The rest of the calculations are the same.
+>>
+>> Let me know if this improves the result and also if I'm missing somethin=
+g
+>> important from our discussions.
+>>
+>> Best
+>>
+>> M
+>>
+>
+> --
+> ----------------------------------------------
+> Pablo Porras Mill=C3=A1n, Ph.D.
+> Molecular Interactions Project Leader
+> European Molecular Biology Laboratory
+> European Bioinformatics Institute (EMBL-EBI)
+> Wellcome Genome Campus
+> Hinxton
+> Cambridge CB10 1SD
+> United Kingdom
+> Tel:     +44 1223 494482
+> email:  pporras@ebi.ac.uk
+> URL:    http://www.ebi.ac.uk/intact/main.xhtml
+> ----------------------------------------------
+>
+>
+
+--94eb2c05d378e3ec9c0559a064a9
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr"><br><div class=3D"gmail_extra"><br><div class=3D"gmail_quo=
+te">On Wed, Sep 20, 2017 at 4:50 PM, Pablo Porras <span dir=3D"ltr">&lt;<a =
+href=3D"mailto:pporras@ebi.ac.uk" target=3D"_blank">pporras@ebi.ac.uk</a>&g=
+t;</span> wrote:<br><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0=
+ .8ex;border-left:1px #ccc solid;padding-left:1ex">Hi Miguel,<br>
+<br>
+Thanks a lot for the update, I have a couple of questions so I can put it i=
+n context.<br>
+<br>
+So, if I understood right, this list only contains those PMIDs where text m=
+ining triplets, taken from EVEx; EuroPMC and STRING, overlap with the pathw=
+ay/interaction resources listed in the second point. Is that so?<br></block=
+quote><div><br></div><div>Not exactly. To be more precise the PMIDs are tho=
+se that have TM triplets. The only proteins considered for importance for a=
+ PMID are those for which the same protein was associated with that PMID in=
+ pathway databases. The triplet in itself does not necessary have to be in =
+the database, but the protein was found by the database in that PMID. You w=
+ill see PMIDs with no associated proteins, because there is no overlap betw=
+een proteins in TM triplets and proteins in database entries.<br></div><div=
+><br>=C2=A0</div><blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8=
+ex;border-left:1px #ccc solid;padding-left:1ex">
+<br>
+Also, you are still using all pathway databases as reference for a &#39;pos=
+itive&#39; hit, and not using the predictions from IID or STRING, right?<br=
+></blockquote><div><br></div><div>What is IID? For coverage of a PMID, whic=
+h weighs down score, I use all that is not TM. Perhaps I should not conside=
+r here STRING<br>=C2=A0<br></div><blockquote class=3D"gmail_quote" style=3D=
+"margin:0 0 0 .8ex;border-left:1px #ccc solid;padding-left:1ex">
+<br>
+I will do some evaluation on the new results as soon as I can and come back=
+ to you.<br>
+<br>
+Cheers,<br>
+<br>
+Pablo.<div><div class=3D"h5"><br>
+<br>
+On 19/09/2017 16:59, Miguel Vazquez wrote:<br>
+<blockquote class=3D"gmail_quote" style=3D"margin:0 0 0 .8ex;border-left:1p=
+x #ccc solid;padding-left:1ex">
+Hi Pablo,<br>
+<br>
+I took the oportunity to have another go at our problem. Please find attach=
+ed a new version of the ranking. It&#39;s based on the previous one with th=
+e following differences.<br>
+<br>
+- For each PMID the proteins listed are only those that come from Text-Mini=
+ng based predictions ie some TM method predicted that paper describes that =
+protein as interacting with another<br>
+- From the proteins above we only take those that are in triplets (PMID:Pro=
+tein:Protein) described in one of the following resources:imex, reactome, B=
+ioGRID, GO_IPI, OmniPath_interactions, OmniPath_ptm, STRING_pi,<br>
+- Some PMID still have large numbers of proteins this is because both the T=
+M methods predict many PPI and these are also used in the pathway databases=
+ above.<br>
+<br>
+The rest of the calculations are the same.<br>
+<br>
+Let me know if this improves the result and also if I&#39;m missing somethi=
+ng important from our discussions.<br>
+<br>
+Best<br>
+<br>
+M<br>
+</blockquote>
+<br></div></div>
+-- <br>
+------------------------------<wbr>----------------<br>
+Pablo Porras Mill=C3=A1n, Ph.D.<br>
+Molecular Interactions Project Leader<br>
+European Molecular Biology Laboratory<br>
+European Bioinformatics Institute (EMBL-EBI)<br>
+Wellcome Genome Campus<br>
+Hinxton<br>
+Cambridge CB10 1SD<br>
+United Kingdom<br>
+Tel:=C2=A0 =C2=A0 =C2=A0<a href=3D"tel:%2B44%201223%20494482" value=3D"+441=
+223494482" target=3D"_blank">+44 1223 494482</a><br>
+email:=C2=A0 <a href=3D"mailto:pporras@ebi.ac.uk" target=3D"_blank">pporras=
+@ebi.ac.uk</a><br>
+URL:=C2=A0 =C2=A0 <a href=3D"http://www.ebi.ac.uk/intact/main.xhtml" rel=3D=
+"noreferrer" target=3D"_blank">http://www.ebi.ac.uk/intact/ma<wbr>in.xhtml<=
+/a><br>
+------------------------------<wbr>----------------<br>
+<br>
+</blockquote></div><br></div></div>
+
+--94eb2c05d378e3ec9c0559a064a9--

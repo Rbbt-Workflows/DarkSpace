@@ -1,0 +1,69 @@
+---
+title: "R Notebook"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+### Synopsis
+
+Evaluation fo thefirst round of scoring Miguel Vázquez did for the DSP.
+
+#### Libraries
+```{r libraries,message=FALSE,warning=FALSE}
+require(data.table)
+require(ggplot2)
+```
+
+### Upload data
+```{r upload}
+dsp_scored <- unique(fread("./DarkSpace-v1.txt",sep="\t",header=T,skip=1))
+```
+
+### Explore data
+
+I check the distribution of the relevance and the combined score separating IMEx positive and negative publications.
+
+#### Relevance score plot
+```{r rel_plot}
+g <- ggplot(dsp_scored,aes(x=Relevance,fill=IMEX))
+g <- g + geom_histogram(alpha=0.8,position='identity')
+g <- g + xlab("relevance score")
+g <- g + ylab("Number of publications")
+g <- g + ggtitle("Relevance score distribution")
+g <- g + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g
+```
+
+```{r rel_plot_v2}
+g1 <- ggplot(dsp_scored,aes(x=Relevance,fill=IMEX))
+g1 <- g1 + geom_density(alpha=0.8,position='identity')
+g1 <- g1 + xlab("relevance score")
+g1 <- g1 + ylab("Number of publications")
+g1 <- g1 + ggtitle("Relevance score density plot")
+g1 <- g1 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g1
+```
+
+#### Combined score plot
+```{r comb_plot}
+g2 <- ggplot(dsp_scored,aes(x=`Combined\ score`,fill=IMEX))
+g2 <- g2 + geom_density(alpha=0.8,position='identity')
+g2 <- g2 + xlab("relevance score")
+g2 <- g2 + ylab("Number of publications")
+g2 <- g2 + scale_x_continuous(limits=c(-0.1,10))
+g2 <- g2 + ggtitle("Combined score density plot\n(only scores between 0 and 10 shown, \nscore can go up to over 600)")
+g2 <- g2 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g2
+```
+
+No IMEx true values were found over a score of 1. 
