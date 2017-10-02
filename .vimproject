@@ -11,6 +11,11 @@ DarkSpace=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass 
    sources=sources{
     DarkSpace.rb
    }
+   tasks=tasks/DarkSpace{
+    basic.rb
+    old.rb
+    plots.rb
+   }
   }
  }
  test=test {
@@ -20,5 +25,25 @@ DarkSpace=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass 
   paircomp_table_final.txt.gz
   pubcomp_table_final.txt.gz
   pubpaircomp_table_final.txt.tar.gz
+ }
+ www=www{
+  views=views{
+  }
+ }
+ manual_evaluation=manual_evaluation filter="*"{
+  round1=round1{ 
+   DarkSpace-v1.txt
+   collab_miguel_vazquez.Rproj
+   eval_miguel_rd1.Rmd
+   eval_miguel_rd1.html
+   eval_miguel_rd1.nb.html
+   eval_miguel_rd1.xlsx
+  }
+  round2=round2{
+   DarkSpace_rank2.xls
+   eval_miguel_rd2.Rmd
+   eval_miguel_rd2.nb.html
+   eval_miguel_rd2.xlsx
+  }
  }
 }
