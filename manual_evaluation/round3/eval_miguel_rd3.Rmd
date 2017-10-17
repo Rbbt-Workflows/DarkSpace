@@ -1,0 +1,414 @@
+---
+title: "Quick evaluation Miguel scores, round 3"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+### Synopsis
+
+Evaluation of the third round of scoring Miguel Vázquez did for the DSP.
+
+#### Libraries
+```{r libraries,message=FALSE,warning=FALSE}
+dyn.load('/Library/Java/JavaVirtualMachines/jdk1.8.0_131.jdk/Contents/Home/jre/lib/server/libjvm.dylib')
+library(rJava)
+require(data.table)
+require(ggplot2)
+require(xlsx)
+require(gridExtra)
+require(splitstackshape)
+```
+
+### Upload data
+```{r upload,warning=FALSE,message=FALSE}
+dsp_scored_rd1 <- unique(fread("../round1/DarkSpace-v1.txt",sep="\t",header=T,skip=1))
+dsp_scored_rd2 <- unique(data.table(read.xlsx2("../round2/DarkSpace_rank2.xls",sheetIndex=1,header=T,colClasses = c("character","numeric","character","integer","character","numeric","numeric"))))
+dsp_scored_rd3 <- unique(fread("./pmid_ranks.txt",header=T))
+```
+
+### Preformat latest evaluation
+```{r preformat_data,warning=FALSE,message=FALSE}
+colnames(dsp_scored_rd3) <- tolower(gsub("-| ","_",colnames(dsp_scored_rd3)))
+colnames(dsp_scored_rd3) <- tolower(gsub("#|\\(|\\)","",colnames(dsp_scored_rd3)))
+
+dsp_scored_rd3 <- dsp_scored_rd3[,known:=ifelse(known_pairs=="",
+                                                "false",
+                                                "true")]
+table(dsp_scored_rd3$known,useNA = "ifany")
+```
+
+### Explore data
+
+I check the distribution of the relevance and the combined score separating IMEx positive and negative publications and comparing the previous iterations with the current one.
+
+#### Relevance score plot
+```{r rel_plot}
+g1 <- ggplot(dsp_scored_rd1,aes(x=Relevance,fill=IMEX))
+g1 <- g1 + geom_histogram(alpha=0.8,position='identity')
+g1 <- g1 + xlab("relevance score")
+g1 <- g1 + ylab("Number of publications")
+g1 <- g1 + ggtitle("Relevance score distribution, round 1")
+#g1 <- g1 + xlim(0.0,2.0)
+g1 <- g1 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g2 <- ggplot(dsp_scored_rd2,aes(x=Relevance,fill=IMEX))
+g2 <- g2 + geom_histogram(alpha=0.8,position='identity')
+g2 <- g2 + xlab("relevance score")
+g2 <- g2 + ylab("Number of publications")
+g2 <- g2 + ggtitle("Relevance score distribution, round 2")
+#g2 <- g2 + xlim(0.0,2.0)
+g2 <- g2 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3 <- ggplot(dsp_scored_rd3,aes(x=relevance,fill=known))
+g3 <- g3 + geom_histogram(alpha=0.8,position='identity')
+g3 <- g3 + xlab("relevance score")
+g3 <- g3 + ylab("Number of publications")
+g3 <- g3 + ggtitle("Relevance score distribution, round 3")
+g3 <- g3 + scale_x_continuous(breaks=c(0:24))
+g3 <- g3 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+grid.arrange(g1, g2, g3, ncol=1)
+```
+
+```{r rel_plot_v2}
+g1.1 <- ggplot(dsp_scored_rd1,aes(x=Relevance,fill=IMEX))
+g1.1 <- g1.1 + geom_density(alpha=0.8,position='identity')
+g1.1 <- g1.1 + xlab("relevance score")
+g1.1 <- g1.1 + ylab("Number of publications")
+g1.1 <- g1.1 + ggtitle("Relevance score distribution, round 1")
+#g1.1 <- g1.1 + xlim(0.0,2.0)
+g1.1 <- g1.1 + ylim(0,5)
+g1.1 <- g1.1 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g2.1 <- ggplot(dsp_scored_rd2,aes(x=Relevance,fill=IMEX))
+g2.1 <- g2.1 + geom_density(alpha=0.8,position='identity')
+g2.1 <- g2.1 + xlab("relevance score")
+g2.1 <- g2.1 + ylab("Number of publications")
+g2.1 <- g2.1 + ggtitle("Relevance score distribution, round 2")
+#g2.1 <- g2.1 + xlim(0.0,2.0)
+g2.1 <- g2.1 + ylim(0,5)
+g2.1 <- g2.1 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3.1 <- ggplot(dsp_scored_rd3,aes(x=relevance,fill=known))
+g3.1 <- g3.1 + geom_density(alpha=0.8,position='identity')
+g3.1 <- g3.1 + xlab("relevance score")
+g3.1 <- g3.1 + ylab("Number of publications")
+g3.1 <- g3.1 + ggtitle("Relevance score distribution, round 3")
+g3.1 <- g3.1 + scale_x_continuous(breaks=c(0:24))
+g3.1 <- g3.1 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+grid.arrange(g1.1, g2.1, g3.1, ncol=1)
+```
+
+The re-calculated score is certainly distributed differently from previous instances. It is also a more complex approach, so I need to explore other angles. 
+
+```{r exploratory}
+g3.2 <- ggplot(dsp_scored_rd3,aes(x=relevance,y=dark_space_interest,colour=known))
+g3.2 <- g3.2 + geom_point(alpha=0.5)
+g3.2 <- g3.2 + xlab("relevance score")
+g3.2 <- g3.2 + ylab("dsp interest (truncated top at 100)")
+g3.2 <- g3.2 + ggtitle("Relevance score vs Dark Space interest")
+g3.2 <- g3.2 + ylim(0.0,100)
+g3.2 <- g3.2 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3.3 <- ggplot(dsp_scored_rd3,aes(x=relevance,y=dark_space_interest,colour=known))
+g3.3 <- g3.3 + geom_smooth(alpha=0.5)
+g3.3 <- g3.3 + xlab("relevance score")
+g3.3 <- g3.3 + ylab("dsp interest")
+g3.3 <- g3.3 + ggtitle("Relevance score vs Dark Space interest, smooth plot")
+#g3.3 <- g3.3 + ylim(0.0,7)
+g3.3 <- g3.3 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3.4 <- ggplot(dsp_scored_rd3,aes(x=relevance,y=dark_space_interest,colour=known))
+g3.4 <- g3.4 + geom_smooth(method="lm",formula=y~x,alpha=0.5)
+g3.4 <- g3.4 + xlab("relevance score")
+g3.4 <- g3.4 + ylab("dsp interest")
+g3.4 <- g3.4 + ggtitle("Relevance score vs Dark Space interest, LM fitted")
+#g3.4 <- g3.4 + ylim(0.0,7)
+g3.4 <- g3.4 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+grid.arrange(g3.2, g3.3, g3.4, ncol=1)
+```
+
+```{r exploratory_2}
+g3.5 <- ggplot(dsp_scored_rd3,aes(x=relevance,y=dark_space_partial_interest,colour=known))
+g3.5 <- g3.5 + geom_point(alpha=0.5)
+g3.5 <- g3.5 + xlab("relevance score")
+g3.5 <- g3.5 + ylab("dsp partial interest (truncated top at 100)")
+g3.5 <- g3.5 + ggtitle("Relevance score vs Dark Space interest")
+g3.5 <- g3.5 + ylim(0.0,100)
+g3.5 <- g3.5 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3.6 <- ggplot(dsp_scored_rd3,aes(x=relevance,y=dark_space_partial_interest,colour=known))
+g3.6 <- g3.6 + geom_smooth(alpha=0.5)
+g3.6 <- g3.6 + xlab("relevance score")
+g3.6 <- g3.6 + ylab("dsp partial interest")
+g3.6 <- g3.6 + ggtitle("Relevance score vs Dark Space interest, smooth plot")
+#g3.6 <- g3.6 + ylim(0.0,7)
+g3.6 <- g3.6 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3.7 <- ggplot(dsp_scored_rd3,aes(x=relevance,y=dark_space_partial_interest,colour=known))
+g3.7 <- g3.7 + geom_smooth(method="lm",formula=y~x,alpha=0.5)
+g3.7 <- g3.7 + xlab("relevance score")
+g3.7 <- g3.7 + ylab("dsp partial interest")
+g3.7 <- g3.7 + ggtitle("Relevance score vs Dark Space interest, LM fitted")
+#g3.7 <- g3.7 + ylim(0.0,7)
+g3.7 <- g3.7 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+grid.arrange(g3.5, g3.6, g3.7, ncol=1)
+```
+It seems the interest scores plot against the relevance score as expected, having highly interesting proteins in the 'darkest' areas of the dataset. 
+
+### Checking distribution of scores by data source
+
+##### Obtain DSP comparison table for reference
+I will take the table that does the comparison at the publication level only for this comparison. 
+```{r dsp_comp_download}
+if(!exists("dsp_pubcomp")){
+        setwd("~/Documents/Projects/dsp/darkspaceproject/dsp_comparison/results/")
+        dsp_pubcompNames = fread('cat pubcomp_table_final.txt.gz | gunzip | head -n 1')[, colnames(.SD)]
+        dsp_pubcomp = fread('cat pubcomp_table_final.txt.gz | gunzip | grep -v "^Day"')
+        setnames(dsp_pubcomp, dsp_pubcompNames)
+        setwd("~/Documents/Projects/dsp/DarkSpace/manual_evaluation/round2/")
+}
+```
+
+##### Incorporating & formatting dataset info to ranked lists
+```{r ranked_origin}
+dsp_scored_rd3$pmid <- as.character(dsp_scored_rd3$pmid)
+dsp_scored_rd3_ori <- unique(merge(dsp_scored_rd3,dsp_pubcomp,by = "pmid",all.x=T,all.y=F))
+dsp_scored_rd3_ori_sel <- dsp_scored_rd3_ori[,.(pmid,
+                                                relevance,
+                                                known,
+                                                db_score,
+                                                dark_space_interest,
+                                                dark_space_partial_interest,
+                                                imex = gsub("1","IMEx",imex.y),
+                                                reactome = gsub("1","reactome",reactome.y),
+                                                tm_epmc = gsub("1","tm_epmc",tm_epmc),
+                                                EVEX = gsub("1","EVEX",EVEX),
+                                                BioGRID = gsub("1","BioGRID",BioGRID),
+                                                GO_IPI = gsub("1","GO_IPI",GO_IPI),
+                                                OmniPath_interactions = gsub("1","OmniPath_interactions",OmniPath_interactions),
+                                                OmniPath_ptm = gsub("1","OmniPath_ptm",OmniPath_ptm))]
+
+fwrite(dsp_scored_rd3_ori_sel,"./dsp_scored_rd3_ori_sel.txt",col.names = T,row.names = F,sep="\t",quote = F)
+
+dsp_scored_rd3_ori_long <- reshape(dsp_scored_rd3_ori_sel,direction="long",v.names="origin",varying=c("imex","reactome","tm_epmc","EVEX","BioGRID","GO_IPI","OmniPath_interactions","OmniPath_ptm"))
+dsp_scored_rd3_ori_long_sel <- unique(dsp_scored_rd3_ori_long[order(pmid,-origin),.(pmid,relevance,known,db_score,dark_space_interest,dark_space_partial_interest,origin,id)])
+
+dsp_scored_rd3_ori_long_sel$select <- "yes"
+
+for (i in 2:nrow(dsp_scored_rd3_ori_long_sel)){
+        if(dsp_scored_rd3_ori_long_sel[i,]$pmid == dsp_scored_rd3_ori_long_sel[i-1,]$pmid & dsp_scored_rd3_ori_long_sel[i,]$origin=="0"){
+                dsp_scored_rd3_ori_long_sel[i,]$select <- "no"
+        }
+        
+}
+
+dsp_scored_rd3_ori_long_final <- dsp_scored_rd3_ori_long_sel[select=="yes",.(pmid,relevance,known,db_score,dark_space_interest,dark_space_partial_interest,origin,id)]
+
+table(dsp_scored_rd3_ori_long_final$known,dsp_scored_rd3_ori_long_final$origin,useNA = "ifany")
+```
+The 
+
+##### Plots origin comparison
+```{r plot_origin1}
+g3.8 <- ggplot(dsp_scored_rd3_ori_long_final,aes(x=relevance,fill=known))
+g3.8 <- g3.8 + geom_histogram(alpha=0.8,position='identity')
+g3.8 <- g3.8 + xlab("relevance score")
+g3.8 <- g3.8 + ylab("Number of publications")
+g3.8 <- g3.8 + ggtitle("Relevance score distribution, round 3")
+g3.8 <- g3.8 + facet_grid(origin~.,scales="free_y")
+g3.8 <- g3.8 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3.8
+```
+
+```{r plot_origin2}
+g3.9 <- ggplot(dsp_scored_rd3_ori_long_final,aes(x=relevance,fill=known))
+g3.9 <- g3.9 + geom_density(alpha=0.9,position='identity')
+g3.9 <- g3.9 + xlab("relevance score")
+g3.9 <- g3.9 + ylab("Number of publications")
+g3.9 <- g3.9 + ggtitle("Relevance score distribution, round 3")
+g3.9 <- g3.9 + facet_grid(origin~.,scales="free_y")
+g3.9 <- g3.9 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3.9
+```
+
+#### Checking dsp interest vs relevance score
+
+```{r plot_comb_ori_1}
+g3.10 <- ggplot(dsp_scored_rd3_ori_long_final,aes(x=relevance,y=dark_space_interest,colour=known))
+g3.10 <- g3.10 + geom_point(alpha=0.5)
+g3.10 <- g3.10 + xlab("relevance score")
+g3.10 <- g3.10 + ylab("dsp interest (truncated top at 100)")
+g3.10 <- g3.10 + ggtitle("Relevance score vs Dark Space interest, per origin")
+g3.10 <- g3.10 + facet_grid(origin~.,scales="free_y")
+g3.10 <- g3.10 + ylim(0.0,100)
+g3.10 <- g3.10 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g3.10
+```
+
+```{r plot_comb_ori_2}
+g3.11 <- ggplot(dsp_scored_rd3_ori_long_final,aes(x=relevance,y=dark_space_interest,colour=known))
+g3.11 <- g3.11 + geom_smooth(alpha=0.5)
+g3.11 <- g3.11 + xlab("relevance score")
+g3.11 <- g3.11 + ylab("dsp interest")
+g3.11 <- g3.11 + ggtitle("Relevance score vs Dark Space interest, smooth plot")
+g3.11 <- g3.11 + facet_grid(origin~.,scales="free_y")
+g3.11 <- g3.11 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g3.11
+```
+
+```{r plot_comb_ori_3}
+g3.12 <- ggplot(dsp_scored_rd3_ori_long_final,aes(x=relevance,y=dark_space_interest,colour=known))
+g3.12 <- g3.12 + geom_smooth(method="lm",formula=y~x,alpha=0.5)
+g3.12 <- g3.12 + xlab("relevance score")
+g3.12 <- g3.12 + ylab("dsp interest")
+g3.12 <- g3.12 + ggtitle("Relevance score vs Dark Space interest, LM fitted")
+g3.12 <- g3.12 + facet_grid(origin~.,scales="free_y")
+g3.12 <- g3.12 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g3.12
+```
+
+### Comparison with round 1
+
+After manual evaluation, it seems the relevance score has lost the power to predict whether a publication contains interactions or not. I will compare to the first round of scoring to see where lie the differences.
+
+#### Merge datasets
+```{r merging_rd1&3}
+dsp_scored_rd1$pmid <- as.character(dsp_scored_rd1$`#ID`)
+dsp_scored_rd1_sel <- dsp_scored_rd1[,.(pmid,
+                                        rel_rd1=Relevance,
+                                        IMEX,
+                                        Coverage,
+                                        Proteins,
+                                        prot_interest = `Protein interest`,
+                                        comb_score = `Combined score`)]
+        
+dsp_scored_rd1_plus_3 <- data.table(unique(merge(dsp_scored_rd1_sel,dsp_scored_rd3_ori_sel,by="pmid",all = T)))
+
+table(dsp_scored_rd1_plus_3$known,dsp_scored_rd1_plus_3$IMEX,useNA = "ifany")
+```
+There are 385 IMEx entries that are not in the 'known' set. How is that possible? Most importantly, over 25,000 known publications are not part of the IMEx dataset. This will be mostly BioGRID data. 
+
+
+#### Plot relevance rd1 vs rd3
+
+First I will explore how the different relevance scores relate to each other.
+```{r rel_sc_comp}
+g4 <- ggplot(dsp_scored_rd1_plus_3,aes(x=relevance,y=rel_rd1,colour=known,group=IMEX))
+#g4 <- g4 + geom_point(alpha=0.5,aes(shape=IMEX))
+g4 <- g4 + geom_point(alpha=0.5)
+g4 <- g4 + xlab("relevance score rd3")
+g4 <- g4 + ylab("relevance score rd1")
+g4 <- g4 + ggtitle("Relevance score rd1 vs rd3")
+g4 <- g4 + facet_grid(IMEX~.,scales="free_y")
+#g4 <- g4 + ylim(0.0,100)
+g4 <- g4 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g4
+```
+
+Now I represent the same plot by source data. I need to wrangle the comparison to 'long' format first. 
+```{r rd1&3_long}
+dsp_scored_rd1_plus_3 <- dsp_scored_rd1_plus_3[,in_IMEx:=ifelse(IMEX=="true",
+                                                                 "IMEx",
+                                                                 "0")]
+dsp_scored_rd1_plus_3_long <- reshape(dsp_scored_rd1_plus_3,direction="long",v.names="origin",varying=c("in_IMEx","reactome","tm_epmc","EVEX","BioGRID","GO_IPI","OmniPath_interactions","OmniPath_ptm"))
+dsp_scored_rd1_plus_3_long_sel <- unique(dsp_scored_rd1_plus_3_long[order(pmid,-origin),.(pmid,
+                                                                       rel_rd1,
+                                                                       relevance,
+                                                                       known,
+                                                                       origin,
+                                                                       db_score,
+                                                                       dark_space_interest,
+                                                                       dark_space_partial_interest)])
+
+dsp_scored_rd1_plus_3_long_sel$select <- "yes"
+
+for (i in 2:nrow(dsp_scored_rd1_plus_3_long_sel)){
+        if(dsp_scored_rd1_plus_3_long_sel[i,]$pmid == dsp_scored_rd1_plus_3_long_sel[i-1,]$pmid & dsp_scored_rd1_plus_3_long_sel[i,]$origin=="0"){
+                dsp_scored_rd1_plus_3_long_sel[i,]$select <- "no"
+        }
+        
+}
+
+dsp_scored_rd1_plus_3_long_final <- dsp_scored_rd1_plus_3_long_sel[select=="yes",.(pmid,rel_rd1,relevance,known,db_score,dark_space_interest,dark_space_partial_interest,origin)]
+
+table(dsp_scored_rd1_plus_3_long_final$known,dsp_scored_rd1_plus_3_long_final$origin,useNA="ifany")
+```
+
+
+
+```{r rel_sc_comp_origin}
+g5 <- ggplot(dsp_scored_rd1_plus_3_long_final,aes(x=relevance,y=rel_rd1,colour=origin,group=known))
+#g5 <- g5 + geom_point(alpha=0.5,aes(shape=IMEX))
+g5 <- g5 + geom_point(alpha=0.2)
+g5 <- g5 + xlab("relevance score rd3")
+g5 <- g5 + ylab("relevance score rd1")
+g5 <- g5 + ggtitle("Relevance score rd1 vs rd3")
+g5 <- g5 + facet_grid(known~.)
+#g5 <- g5 + ylim(0.0,100)
+g5 <- g5 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g5
+```

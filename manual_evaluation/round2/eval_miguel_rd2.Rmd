@@ -22,6 +22,7 @@ require(splitstackshape)
 ```{r upload}
 dsp_scored_rd1 <- unique(fread("../round1/DarkSpace-v1.txt",sep="\t",header=T,skip=1))
 dsp_scored_rd2 <- unique(data.table(read.xlsx2("./DarkSpace_rank2.xls",sheetIndex=1,header=T,colClasses = c("character","numeric","character","integer","character","numeric","numeric"))))
+table(dsp_scored_rd2$IMEX,useNA = "ifany")
 ```
 
 ### Explore data

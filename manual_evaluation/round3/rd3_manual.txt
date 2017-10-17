@@ -1,0 +1,91 @@
+pmid	relevance	known	db_score	dark_space_interest	dark_space_partial_interest	biogrid	contains interactions?	pablo_comment	group	% yes	% BioGRID
+18673564	18.16147114	false	2	10	31	0	no	cites large PPI study and analyzes interactions	top 20	55	0
+22231447	17.69961291	false	2	3	3	0	yes				
+19703986	16.98323571	false	2	5	11	0	no	unspecific RNA-protein interactions			
+6090951	16.85766524	false	4	1	1	0	no				
+20865117	16.8138957	false	3	0	1	0	no				
+19936222	16.77404549	false	2	8	62	0	no				
+19042971	16.76228718	false	1	1	4	0	yes	ChIP data			
+20100910	16.76034777	false	1	5	18	0	yes				
+16316467	16.74587871	false	2	5	8	0	no				
+26714015	16.62023617	false	2	1	1	0	yes				
+19187526	16.58327307	false	2	21	75	0	yes				
+7624324	16.49595839	false	4	1	1	0	yes				
+21615552	16.39131667	false	2	4	7	0	yes				
+15647107	16.33713362	false	3	3	5	0	yes				
+21552547	16.22175822	false	2	17	78	0	no				
+22028885	16.16805836	false	2	11	65	0	no	non-curatable kinase assay			
+27846260	16.13916971	false	3	0	0	0	no	interaction mentioned in abstract, no data			
+22069485	16.11377522	false	2	3	5	0	yes				
+20157423	15.94283353	false	2	6	41	0	yes				
+23671573	15.8705147	false	3	3	5	0	yes				
+16059745	9.99862731	false	0	0	0	0	no		relevance 10 area	60	10
+16109918	9.997593542	false	2	1	1	0	no	antigen-antibody interaction			
+20818396	9.997430644	false	1	2	8	0	yes				
+1356634	9.996844021	false	1	1	2	0	no				
+17576689	9.995505543	false	1	1	3	0	yes				
+23213356	9.993165184	false	2	1	1	0	yes				
+18001466	9.991995245	false	3	1	3	0	no				
+22084573	9.991560253	false	2	3	23	0	yes				
+16778136	9.990969679	false	3	1	6	0	yes				
+15572351	9.987918671	false	2	1	8	BioGRID	yes				
+25622105	10.49684778	false	1	0	3	0	yes	REMSA data	relevance 10 area 2	60	30
+20462955	10.49298972	false	2	6	14	0	yes				
+20221258	10.49287002	false	1	1	8	0	no	computational paper on PPI analysis			
+17349958	10.49218657	false	3	0	0	0	no	contains non-curatable phosphorylation data using IP approach			
+18021410	10.49039554	false	2	3	23	0	no				
+10037723	10.48945975	false	3	0	0	BioGRID	yes				
+10393177	10.48945975	false	3	0	0	0	yes				
+10671565	10.48945975	false	3	0	0	0	no				
+12695525	10.48945975	false	3	0	0	BioGRID	yes				
+15001692	10.48945975	false	3	0	0	BioGRID	yes				
+17690115	6.999952459	false	3	2	2	0	yes		relevance 7 area	80	0
+16244670	6.999891806	false	0	0	0	0	yes	ChIP data			
+17202468	6.997994206	false	1	3	37	0	yes				
+11106648	6.997190096	false	3	0	1	0	yes				
+12496250	6.996474131	false	0	0	0	0	yes				
+21917897	6.996404861	false	2	6	43	0	no	Interaction analysis done with InnateDB data			
+18020452	6.996354429	false	0	0	0	0	yes				
+11134231	6.996274357	false	0	0	0	0	no	Ca+-mediated activation / trasnport presented as interaction			
+17010654	6.995686031	false	2	2	5	0	yes				
+16254078	6.995227778	false	2	5	16	0	yes	NA-protein interactions			
+10064069	6.954714055	false	3	0	0	0	yes		relevance 7 area 2	80	20
+10067895	6.954714055	false	3	0	0	0	yes				
+10085094	6.954714055	false	3	0	0	BioGRID	yes				
+10085131	6.954714055	false	3	0	0	0	yes				
+10090723	6.954714055	false	3	0	0	BioGRID	yes				
+10195903	6.954714055	false	3	0	0	0	yes				
+10197981	6.954714055	false	3	0	0	0	yes				
+10206975	6.954714055	false	3	0	0	0	no				
+10329850	6.954714055	false	3	0	0	0	yes				
+10342886	6.954714055	false	3	0	0	0	no / NA	full article not available, seems to be referred to protein-cell binding			
+21253017	4.999108425	false	1	1	10	0	no		relevance 5 area	50	0
+1730090	4.998501264	false	2	1	5	0	yes	NA-protein interactions			
+11685558	4.998501264	false	2	1	2	0	no				
+18701462	4.998142368	false	0	0	0	0	yes				
+7929391	4.998104648	false	2	1	3	0	yes				
+21572956	4.99782083	false	0	0	0	0	no				
+8095360	4.997022949	false	0	0	0	0	no / NA	full article not available, seems to be referred to protein complex-cell binding			
+18838553	4.996492604	false	2	2	14	0	yes				
+15270695	4.994461001	false	1	1	5	0	yes				
+11108261	4.993315937	false	3	0	7	0	no				
+24286029	0.999537726	false	1	1	4	0	yes		relevance 1 area	80	0
+27790974	0.999537726	false	0	0	0	0	yes				
+28445932	0.999268176	false	1	1	2	0	yes				
+23706036	0.999268176	false	2	1	1	0	no				
+27642012	0.999268176	false	1	1	1	0	yes				
+18617529	0.999268176	false	0	0	0	0	no	DNA-DNA interactions, not the kind of data we capture			
+21270437	0.999268176	false	0	0	0	0	yes	ChIP data			
+22986534	0.999268176	false	0	0	0	0	yes	ChIP data			
+23027905	0.999268176	false	0	0	0	0	yes				
+23762244	0.999268176	false	0	0	0	0	yes	ChiP data - ChIP seq large dataset, not really curatable			
+28450907	0.573307272	false	0	0	0	0	no		bottom 10 area	30	0
+28451253	0.573307272	false	0	0	0	0	no				
+28453729	0.573307272	false	0	0	0	0	no				
+28458520	0.573307272	false	0	0	0	0	no				
+28468127	0.573307272	false	0	0	0	0	yes				
+28472098	0.573307272	false	0	0	0	0	no				
+28500307	0.573307272	false	0	0	0	0	yes	ChIP data			
+28506239	0.573307272	false	0	0	0	0	no				
+28508041	0.573307272	false	0	0	0	0	yes	ChIP data			
+28514955	0.573307272	false	0	0	0	0	no	aptamer-bacteria interactions			

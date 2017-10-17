@@ -131,7 +131,11 @@ require(ggplot2)</code></pre>
 </div>
 <div id="upload-data" class="section level3">
 <h3>Upload data</h3>
-<pre class="r"><code>dsp_scored &lt;- unique(fread(&quot;./DarkSpace-v1.txt&quot;,sep=&quot;\t&quot;,header=T,skip=1))</code></pre>
+<pre class="r"><code>dsp_scored &lt;- unique(fread(&quot;./DarkSpace-v1.txt&quot;,sep=&quot;\t&quot;,header=T,skip=1))
+table(dsp_scored$IMEX,useNA = &quot;ifany&quot;)</code></pre>
+<pre><code>## 
+##  false   true 
+## 105336   8979</code></pre>
 </div>
 <div id="explore-data" class="section level3">
 <h3>Explore data</h3>

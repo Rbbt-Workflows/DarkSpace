@@ -1,8 +1,8 @@
 ---
 title: "R Notebook"
 output:
-  html_document: default
   html_notebook: default
+  html_document: default
 ---
 
 ### Synopsis
@@ -18,6 +18,7 @@ require(ggplot2)
 ### Upload data
 ```{r upload}
 dsp_scored <- unique(fread("./DarkSpace-v1.txt",sep="\t",header=T,skip=1))
+table(dsp_scored$IMEX,useNA = "ifany")
 ```
 
 ### Explore data
