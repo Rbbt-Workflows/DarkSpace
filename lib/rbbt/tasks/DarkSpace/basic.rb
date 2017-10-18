@@ -1,3 +1,4 @@
+require 'rbbt/util/R'
 module DarkSpace
 
   task :pmid_pair_by_resource => :tsv do
@@ -57,7 +58,8 @@ module DarkSpace
 
   dep :pmid_pair_by_resource
   dep :pmid_tm_scores
-  task :pmid_tm_relevance => :tsv do
+  input :max, :boolean, "Use maximum of scores instead of average", true
+  task :pmid_tm_relevance => :tsv do |max|
 
     require 'rbbt/util/R' 
 
@@ -65,14 +67,23 @@ module DarkSpace
     tsv = step(:pmid_pair_by_resource).load
 
     tsv.add_field "DB score" do |k,values|
-      ppi  = values.values_at("IMEX", "BioGRID", "GO").select{|l| l.any?}.length
+      imex = values["IMEX"].any? ? 1 : 0
+      ppi  = values.values_at("BioGRID", "GO").select{|l| l.any?}.length
+
+      any_ppi = imex + ppi > 0 ? 1 : 0
+
       rest = values.values_at("Reactome", "OmniPath_interactions", "OmniPath_ptm", "IID_pred", "STRING_pi").select{|l| l.any?}.length
-      ppi * 10 + rest
+
+      imex * 10 + ppi * 10 + rest * 1
     end
 
-    scores = step(:pmid_tm_scores).load.to_list{|values| values.empty? ? nil : Misc.mean(values.collect{|v| v.to_f}) }
+    if max
+      scores = step(:pmid_tm_scores).load.to_list{|values| values.empty? ? nil : Misc.max(values.collect{|v| v.to_f}) }
+    else
+      scores = step(:pmid_tm_scores).load.to_list{|values| values.empty? ? nil : Misc.mean(values.collect{|v| v.to_f}) }
+    end
 
-    tsv = tsv.attach(scores)
+    tsv = tsv.select(scores.keys).attach(scores)
 
     pred = tsv.R <<-EOF
 names(data) <- make.names(names(data))
@@ -169,6 +180,130 @@ names(data) <- c('Relevance')
     end
 
     tsv
+  end
+
+  task :pmid_validation => :tsv do
+    tsv1 = Rbbt.manual_evaluation.round1["eval_miguel_rd1_validation.txt"].tsv :type => :list, :cast => :to_s, :fields => ["contains interactions?"]
+    tsv1 = tsv1.add_field "Valid" do |k,v|
+      v["contains interactions?"] == "yes"
+    end.slice("Valid")
+
+    tsv2 = Rbbt.manual_evaluation.round2["eval_miguel_rd2_validation.txt"].tsv :type => :list, :cast => :to_s, :fields => ["contains interactions?"]
+    tsv2 = tsv2.add_field "Valid" do |k,v|
+      v["contains interactions?"] == "yes"
+    end.slice("Valid")
+
+    tsv3 = Rbbt.manual_evaluation.round3["eval_miguel_rd3_validation.txt"].tsv :type => :list, :cast => :to_s, :fields => ["contains_interactions"]
+    tsv3 = tsv3.add_field "Valid" do |k,v|
+      v["contains_interactions"] == "yes"
+    end.slice("Valid")
+
+    tsv1.add_field "Source" do 
+      "Round1"
+    end
+    tsv2.add_field "Source" do 
+      "Round2"
+    end
+    tsv3.add_field "Source" do 
+      "Round3"
+    end
+
+    tsv1.merge! tsv2
+    tsv1.merge! tsv3
+
+    tsv1
+  end
+
+  dep :pmid_validation
+  dep :pmid_ranks
+  task :eval => :tsv do
+    ranks = step(:pmid_ranks).load
+    validation = step(:pmid_validation).load
+
+    valid = validation.select("Valid" => "true").keys
+    nonvalid = validation.select("Valid" => "false").keys
+
+    valid_relevance = ranks.values_at(*valid).collect{|v| v["Relevance"].first.to_f}
+    nonvalid_relevance = ranks.values_at(*nonvalid).collect{|v| v["Relevance"].first.to_f}
+
+    iif valid
+    iif valid_relevance.sort
+    iif nonvalid
+    iif nonvalid_relevance.sort
+    require 'rbbt/util/R'
+    tsv = TSV.setup({}, :key_field => "Statistic", :fields => ["Value"], :type => :single)
+    tsv["Valid mean"] = Misc.mean valid_relevance
+    tsv["NonValid mean"] = Misc.mean nonvalid_relevance
+    tsv["p-value"] = R.eval("t.test(#{R.ruby2R valid_relevance}, #{R.ruby2R nonvalid_relevance})$p.value")
+    tsv
+  end
+
+  dep :pmid_validation
+  dep :pmid_ranks
+  extension :png
+  task :eval_ROC => :tsv do
+    ranks = step(:pmid_ranks).load
+    validation = step(:pmid_validation).load
+
+    valid = validation.select("Valid" => "true").keys
+    nonvalid = validation.select("Valid" => "false").keys
+
+    valid_relevance = ranks.values_at(*valid).collect{|v| v["Relevance"].first.to_f}
+    nonvalid_relevance = ranks.values_at(*nonvalid).collect{|v| v["Relevance"].first.to_f}
+
+    all_scores = (valid_relevance + nonvalid_relevance).flatten.sort
+    score_values = {}
+    all_scores.each do |score|
+      tp = valid_relevance.select{|s| s >= score}.length
+      fp = nonvalid_relevance.select{|s| s >= score}.length
+
+      tn = nonvalid_relevance.select{|s| s < score}.length
+      fn = valid_relevance.select{|s| s < score}.length
+
+      precision = tp.to_f / (tp + fp)
+      recall = tpr = tp.to_f / valid_relevance.length
+
+      fpr = fp.to_f / nonvalid_relevance.length
+
+      score_values[score] = [tp, fp, tn, fn, tpr, fpr, precision, recall]
+    end
+
+    precision = score_values.sort_by{|score,values| score}.collect{|score,values| values[-2] }.flatten
+    recall = score_values.sort_by{|score,values| score}.collect{|score,values| values[-1] }.flatten
+    tpr = score_values.sort_by{|score,values| score}.collect{|score,values| values[-4] }.flatten
+    fpr = score_values.sort_by{|score,values| score}.collect{|score,values| values[-3] }.flatten
+
+    R.run <<-EOF, [:svg]
+
+precision = #{R.ruby2R precision}
+recall = #{R.ruby2R recall}
+tpr = #{R.ruby2R tpr}
+fpr = #{R.ruby2R fpr}
+png('#{self.path}', width=400, height=800)
+par(mfrow=c(2,1))
+plot(recall, precision, xlim=c(0,1), ylim=c(0,1))
+plot(fpr, tpr, xlim=c(0,1), ylim=c(0,1))
+dev.off
+    EOF
+    nil
+  end
+
+  dep :pmid_tm_relevance
+  extension :svg
+  task :pmid_tm_relevance_plot => :tsv do
+
+    tsv = step(:pmid_tm_relevance).load
+
+    tsv.R <<-EOF, [:svg]
+rbbt.require('ggplot2')
+names(data) <- make.names(names(data))
+p = ggplot(data) + geom_smooth(aes(x=Relevance, y=DB.score)) + geom_point(aes(x=Relevance, y=DB.score), alpha=0.1)
+
+rbbt.SVG.save.fast('#{self.path}', p, width=5, height=5)
+data = NULL
+    EOF
+
+    nil
   end
 
 
