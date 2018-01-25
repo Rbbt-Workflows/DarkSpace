@@ -7,13 +7,13 @@ DarkSpace=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass 
  bin=bin filter="*"{
  }
  lib=lib {
+  sinatra.rb
   rbbt=rbbt{
    sources=sources{
     DarkSpace.rb
    }
    tasks=tasks/DarkSpace{
     basic.rb
-    old.rb
     plots.rb
    }
   }
@@ -28,6 +28,11 @@ DarkSpace=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass 
  }
  www=www{
   views=views{
+   DarkSpace=DarkSpace{
+    pmid_ranks=pmid_ranks{
+     job_result.haml
+    }
+   }
   }
  }
  manual_evaluation=manual_evaluation filter="*"{
