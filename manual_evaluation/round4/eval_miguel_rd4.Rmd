@@ -280,19 +280,76 @@ for (i in 2:nrow(manual_ori_sel_long)){
 
 manual_ori_sel_long <- manual_ori_sel_long[select=="yes"]
 
-g5 <- ggplot(manual_ori_sel_long,aes(x=relevance,fill=contains_interactions))
-g5 <- g5 + geom_histogram(alpha=0.8,position='stack')
-g5 <- g5 + xlab("relevance score")
-g5 <- g5 + ylab("Number of publications")
-g5 <- g5 + ggtitle("Manual evaluation by relevance score and round")
-g5 <- g5 + facet_grid(origin~round,scales="free")
-g5 <- g5 + theme(plot.title = element_text(),
+manual_ori_sel_long_simple <- manual_ori_sel_long[,.(id,
+                                              pmid,
+                                              relevance,
+                                              contains_interactions = ifelse(grepl("no",contains_interactions),
+                                                                             "no",
+                                                                             "yes"),
+                                              origin,
+                                              round,
+                                              select)]
+
+g5.1 <- ggplot(manual_ori_sel_long_simple[round=="rd1"],aes(x=relevance,fill=contains_interactions))
+g5.1 <- g5.1 + geom_density(alpha=0.8,position='identity')
+g5.1 <- g5.1 + xlab("relevance score")
+g5.1 <- g5.1 + ylab("Number of publications")
+g5.1 <- g5.1 + ggtitle("Manual evaluation by relevance score, round 1")
+g5.1 <- g5.1 + theme(plot.title = element_text(),
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
-g5
+
+g5.2 <- ggplot(manual_ori_sel_long_simple[round=="rd2"],aes(x=relevance,fill=contains_interactions))
+g5.2 <- g5.2 + geom_density(alpha=0.8,position='identity')
+g5.2 <- g5.2 + xlab("relevance score")
+g5.2 <- g5.2 + ylab("Number of publications")
+g5.2 <- g5.2 + ggtitle("Manual evaluation by relevance score, round 2")
+g5.2 <- g5.2 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g5.3 <- ggplot(manual_ori_sel_long_simple[round=="rd3"],aes(x=relevance,fill=contains_interactions))
+g5.3 <- g5.3 + geom_density(alpha=0.8,position='identity')
+g5.3 <- g5.3 + xlab("relevance score")
+g5.3 <- g5.3 + ylab("Number of publications")
+g5.3 <- g5.3 + ggtitle("Manual evaluation by relevance score, round 3")
+g5.3 <- g5.3 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g5.4 <- ggplot(manual_ori_sel_long_simple[round=="rd4"],aes(x=relevance,fill=contains_interactions))
+g5.4 <- g5.4 + geom_density(alpha=0.8,position='identity')
+g5.4 <- g5.4 + xlab("relevance score")
+g5.4 <- g5.4 + ylab("Number of publications")
+g5.4 <- g5.4 + ggtitle("Manual evaluation by relevance score, round 4")
+g5.4 <- g5.4 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+grid.arrange(g5.1, g5.2, g5.3, g5.4, ncol=1)
 ```
 
-Numbers are to low to draw final conclusions, but it seems that the third round of the relevance score does not distinguish between papers containing interaction data as cleanly as in previous cases. 
+###### Plot manual evalutation by data source
+```{r}
+g6 <- ggplot(manual_ori_sel_long_simple,aes(x=relevance,fill=contains_interactions))
+g6 <- g6 + geom_histogram(alpha=0.8,position='stack')
+g6 <- g6 + xlab("relevance score")
+g6 <- g6 + ylab("Number of publications")
+g6 <- g6 + ggtitle("Manual evaluation by relevance score and round")
+g6 <- g6 + facet_grid(origin~round,scales="free")
+g6 <- g6 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g6
 
-This could be caused by the change in criteria in terms of what is considered to be known or not. Rounds 1 and 2 only took into account IMEx data, round 3 takes BioGRID & GO into the mix. 
+```
+
+
+Numbers are a bit low to draw final conclusions, but it seems that the fourth iteration of the relevance score can distinguish between papers containing interaction data regardless of the origin of the data . 
+
+We can use this interation as input for the DSP curation pipeline. 
