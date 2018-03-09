@@ -241,7 +241,7 @@ names(data) <- c('Relevance')
   dep :pmid_validation
   dep :pmid_ranks
   extension :png
-  task :eval_ROC => :tsv do
+  task :eval_ROC => :binary do
     ranks = step(:pmid_ranks).load
     validation = step(:pmid_validation).load
 
@@ -268,10 +268,10 @@ names(data) <- c('Relevance')
       score_values[score] = [tp, fp, tn, fn, tpr, fpr, precision, recall]
     end
 
-    precision = score_values.sort_by{|score,values| score}.collect{|score,values| values[-2] }.flatten
     recall = score_values.sort_by{|score,values| score}.collect{|score,values| values[-1] }.flatten
-    tpr = score_values.sort_by{|score,values| score}.collect{|score,values| values[-4] }.flatten
+    precision = score_values.sort_by{|score,values| score}.collect{|score,values| values[-2] }.flatten
     fpr = score_values.sort_by{|score,values| score}.collect{|score,values| values[-3] }.flatten
+    tpr = score_values.sort_by{|score,values| score}.collect{|score,values| values[-4] }.flatten
 
     R.run <<-EOF, [:svg]
 

@@ -1,0 +1,31 @@
+- keys = result.select("Relevance"){|v| v.flatten.first.to_f > 8 }.select("Dark Space (partial) interest"){|v| v.flatten.first.to_f > 0}.keys
+- new  = TSV.setup(keys, :key_field => "PMID", :fields => [], :type => :double)
+- db_fields = %w(IMEX BioGRID GO Reactome OmniPath_interactions OmniPath_ptm IID_pred STRING_pi STRING_tm EPMC  EVEX) + ["Known pairs", "Pathway pairs", "Text-Mining pairs", "Dark Space", "Pathway matched Dark Space","Pathway partial-matched Dark Space"]
+- rest = result.fields - db_fields
+- organism = DarkSpace.organism
+
+- bar = @step.progress_bar("Processing databases", :max => db_fields.length)
+- db_fields.each do |field|
+  - new.add_field field do |k,v|
+    - result[k][field].collect{|p| p.split(":").collect{|g| Gene.setup(g, "UniProt/SwissProt Accession", organism).link } * ":"}
+  - bar.tick
+
+- new = new.attach result, :fields => rest
+- numeric_headers = rest.select{|f| f.include?('score') || f.include?('interest')} + ["Relevance"]
+
+- numeric_headers.each do |h|
+  - header h, "NumericValue"
+= table do
+  - new
+
+:deferjs
+  register_dom_update("a.PMID.entity", function(elems){
+    $(elems).click(function(){
+      var pmid = $(this).attr('attr-entity_id');
+      var url = rbbt.url_add_script_name('/pmid/info/' + pmid)
+      rbbt.get(url).then(function(data){
+        rbbt.modal.controller.show(data.abstract, data.title)
+      })
+      return false
+    })
+  })
