@@ -93,38 +93,41 @@ g4 <- g4 + theme(plot.title = element_text(),
 grid.arrange(g1, g2, g3, g4, ncol=1)
 ```
 
-```{r rel_plot_v2}
+```{r rel_plot_v2,fig.height=7,fig.width=7}
 g1.1 <- ggplot(dsp_scored_rd1,aes(x=Relevance,fill=IMEX))
 g1.1 <- g1.1 + geom_density(alpha=0.8,position='identity')
-g1.1 <- g1.1 + xlab("relevance score")
-g1.1 <- g1.1 + ylab("Number of publications")
+g1.1 <- g1.1 + xlab("")
+g1.1 <- g1.1 + ylab("")
 g1.1 <- g1.1 + ggtitle("Relevance score distribution, round 1")
 #g1.1 <- g1.1 + xlim(0.0,2.0)
 g1.1 <- g1.1 + ylim(0,5)
 g1.1 <- g1.1 + theme(plot.title = element_text(),
+               legend.position = "none",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
 
 g2.1 <- ggplot(dsp_scored_rd2,aes(x=Relevance,fill=IMEX))
 g2.1 <- g2.1 + geom_density(alpha=0.8,position='identity')
-g2.1 <- g2.1 + xlab("relevance score")
-g2.1 <- g2.1 + ylab("Number of publications")
+g2.1 <- g2.1 + xlab("")
+g2.1 <- g2.1 + ylab("")
 g2.1 <- g2.1 + ggtitle("Relevance score distribution, round 2")
 #g2.1 <- g2.1 + xlim(0.0,2.0)
 g2.1 <- g2.1 + ylim(0,5)
 g2.1 <- g2.1 + theme(plot.title = element_text(),
+               legend.position = "none",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
 
 g3.1 <- ggplot(dsp_scored_rd3,aes(x=Relevance,fill=known))
 g3.1 <- g3.1 + geom_density(alpha=0.8,position='identity')
-g3.1 <- g3.1 + xlab("relevance score")
+g3.1 <- g3.1 + xlab("")
 g3.1 <- g3.1 + ylab("Number of publications")
 g3.1 <- g3.1 + ggtitle("Relevance score distribution, round 3")
 g3.1 <- g3.1 + scale_x_continuous(breaks=c(0:24))
 g3.1 <- g3.1 + theme(plot.title = element_text(),
+               legend.position = "none",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
@@ -132,15 +135,16 @@ g3.1 <- g3.1 + theme(plot.title = element_text(),
 g4.1 <- ggplot(dsp_scored_rd4,aes(x=Relevance,fill=known))
 g4.1 <- g4.1 + geom_density(alpha=0.8,position='identity')
 g4.1 <- g4.1 + xlab("relevance score")
-g4.1 <- g4.1 + ylab("Number of publications")
+g4.1 <- g4.1 + ylab("")
 g4.1 <- g4.1 + ggtitle("Relevance score distribution, round 4")
 g4.1 <- g4.1 + scale_x_continuous(breaks=c(0:24))
 g4.1 <- g4.1 + theme(plot.title = element_text(),
+               legend.position = "bottom",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
 
-grid.arrange(g1.1, g2.1, g3.1, g4.1, ncol=1)
+grid.arrange(g1.1, g2.1, g3.1, g4.1, ncol=1, heights = c(1.1,1.2,1.5,2))
 ```
 
 The re-calculated score is distributed very similarly to the previous instance. I decide to manually evaluate slices of the distribution, to see whether the score correlates with uncurated interaction papers.
@@ -239,7 +243,7 @@ fwrite(manual_ori,"./manual_ori.txt",col.names = T,row.names = F,quote=F,sep="\t
 ```
 
 ##### Plot manual evaluation
-```{r plot_man_eval}
+```{r plot_man_eval,fig.height=7,fig.width=10}
 manual_ori_sel <- unique(manual_ori[,.(pmid,
                                         relevance,
                                         contains_interactions,
@@ -292,30 +296,33 @@ manual_ori_sel_long_simple <- manual_ori_sel_long[,.(id,
 
 g5.1 <- ggplot(manual_ori_sel_long_simple[round=="rd1"],aes(x=relevance,fill=contains_interactions))
 g5.1 <- g5.1 + geom_density(alpha=0.8,position='identity')
-g5.1 <- g5.1 + xlab("relevance score")
-g5.1 <- g5.1 + ylab("Number of publications")
+g5.1 <- g5.1 + xlab("")
+g5.1 <- g5.1 + ylab("")
 g5.1 <- g5.1 + ggtitle("Manual evaluation by relevance score, round 1")
 g5.1 <- g5.1 + theme(plot.title = element_text(),
+               legend.position = "none",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
 
 g5.2 <- ggplot(manual_ori_sel_long_simple[round=="rd2"],aes(x=relevance,fill=contains_interactions))
 g5.2 <- g5.2 + geom_density(alpha=0.8,position='identity')
-g5.2 <- g5.2 + xlab("relevance score")
-g5.2 <- g5.2 + ylab("Number of publications")
+g5.2 <- g5.2 + xlab("")
+g5.2 <- g5.2 + ylab("")
 g5.2 <- g5.2 + ggtitle("Manual evaluation by relevance score, round 2")
 g5.2 <- g5.2 + theme(plot.title = element_text(),
+               legend.position = "none",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
 
 g5.3 <- ggplot(manual_ori_sel_long_simple[round=="rd3"],aes(x=relevance,fill=contains_interactions))
 g5.3 <- g5.3 + geom_density(alpha=0.8,position='identity')
-g5.3 <- g5.3 + xlab("relevance score")
+g5.3 <- g5.3 + xlab("")
 g5.3 <- g5.3 + ylab("Number of publications")
 g5.3 <- g5.3 + ggtitle("Manual evaluation by relevance score, round 3")
 g5.3 <- g5.3 + theme(plot.title = element_text(),
+               legend.position = "none",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
@@ -323,18 +330,19 @@ g5.3 <- g5.3 + theme(plot.title = element_text(),
 g5.4 <- ggplot(manual_ori_sel_long_simple[round=="rd4"],aes(x=relevance,fill=contains_interactions))
 g5.4 <- g5.4 + geom_density(alpha=0.8,position='identity')
 g5.4 <- g5.4 + xlab("relevance score")
-g5.4 <- g5.4 + ylab("Number of publications")
+g5.4 <- g5.4 + ylab("")
 g5.4 <- g5.4 + ggtitle("Manual evaluation by relevance score, round 4")
 g5.4 <- g5.4 + theme(plot.title = element_text(),
+               legend.position = "bottom",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
 
-grid.arrange(g5.1, g5.2, g5.3, g5.4, ncol=1)
+grid.arrange(g5.1, g5.2, g5.3, g5.4, ncol=1, heights = c(1.1,1.2,1.5,2))
 ```
 
 ###### Plot manual evalutation by data source
-```{r}
+```{r, fig.height=6,fig.width=6}
 g6 <- ggplot(manual_ori_sel_long_simple,aes(x=relevance,fill=contains_interactions))
 g6 <- g6 + geom_histogram(alpha=0.8,position='stack')
 g6 <- g6 + xlab("relevance score")
@@ -342,6 +350,7 @@ g6 <- g6 + ylab("Number of publications")
 g6 <- g6 + ggtitle("Manual evaluation by relevance score and round")
 g6 <- g6 + facet_grid(origin~round,scales="free")
 g6 <- g6 + theme(plot.title = element_text(),
+               legend.position = "bottom",
                panel.grid.major = element_blank(),
                panel.grid.minor = element_blank(),
                panel.background = element_blank())
