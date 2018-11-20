@@ -5,6 +5,7 @@ require 'rbbt/workflow'
 Misc.add_libdir if __FILE__ == $0
 
 require 'rbbt/sources/DarkSpace'
+require 'rbbt/sources/PIPs'
 
 module DarkSpace
   extend Workflow
