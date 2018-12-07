@@ -344,7 +344,7 @@ grid.arrange(g5.1, g5.2, g5.3, g5.4, ncol=1, heights = c(1.1,1.2,1.5,2))
 ###### Plot manual evalutation by data source
 ```{r, fig.height=6,fig.width=6}
 g6 <- ggplot(manual_ori_sel_long_simple,aes(x=relevance,fill=contains_interactions))
-g6 <- g6 + geom_histogram(alpha=0.8,position='stack')
+g6 <- g6 + geom_histogram(alpha=0.8,position='stack', bins = 15)
 g6 <- g6 + xlab("relevance score")
 g6 <- g6 + ylab("Number of publications")
 g6 <- g6 + ggtitle("Manual evaluation by relevance score and round")
@@ -362,3 +362,11 @@ g6
 Numbers are a bit low to draw final conclusions, but it seems that the fourth iteration of the relevance score can distinguish between papers containing interaction data regardless of the origin of the data . 
 
 We can use this interation as input for the DSP curation pipeline. 
+
+#### Estimating size to curate
+
+```{r summ_stat}
+median(dsp_scored_rd4$Relevance)
+mean(dsp_scored_rd4$Relevance)
+```
+We assume a % of true positives of around 90% for those publications with a relevance score >6.5 (`r nrow(dsp_scored_rd4[Relevance>6.5])` publications, `r round(nrow(dsp_scored_rd4[Relevance>6.5])*.9)` estimated true positives). Considering also those below that score, and estimating a true positive rate of 40%, that adds `r round(nrow(dsp_scored_rd4[Relevance<6.5])*.4)` potentially positive publications below 6.5. Total number of potentially positive publications is `r round(nrow(dsp_scored_rd4[Relevance>6.5])*0.9 + nrow(dsp_scored_rd4[Relevance<=6.5])*.4)`.
