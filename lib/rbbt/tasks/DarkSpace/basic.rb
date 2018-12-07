@@ -101,9 +101,11 @@ names(data) <- c('Relevance')
     tsv.attach pred
   end
 
+  dep :predicted_ppi
   dep :pmid_pair_by_resource
   task :pmid_dark_space => :tsv do
     tsv = step(:pmid_pair_by_resource).load
+    predicted_ppi = step(:predicted_ppi).load.collect{|p| p.split(":").sort.join(":")}
 
     tsv.monitor = true
 
@@ -121,6 +123,16 @@ names(data) <- c('Relevance')
 
     tsv.add_field "Dark Space" do |k,values|
       values["Text-Mining pairs"] - values["Known pairs"]
+    end
+
+    uni2name = Organism.identifiers(DarkSpace.organism).index(:target => "Associated Gene Name", :fields => "UniProt/SwissProt Accession", :order => true, :persist => true)
+    tsv.add_field "Predicted Dark Space" do |k,values|
+      values["Dark Space"].select do |pair|
+        parts = pair.split(":").collect{|p| uni2name[p]}
+        next false if parts.compact.length < 2
+        name_pair = parts.sort.join(":")
+        predicted_ppi.include? name_pair
+      end
     end
 
     tsv.add_field "Pathway matched Dark Space" do |k,values|
@@ -157,6 +169,12 @@ names(data) <- c('Relevance')
     protein_counts
   end
 
+  input :score, :float, "Minumum PPI prediction score", 0
+  task :predicted_ppi => :array do |score|
+    tsv = PIPS.data.tsv
+    tsv.unzip.select("Score"){|s| s.to_f >= score}.keys
+  end
+
 
   dep :pmid_dark_space, :compute => :produce
   dep :pmid_tm_relevance, :compute => :produce
@@ -176,6 +194,11 @@ names(data) <- c('Relevance')
 
     tsv.add_field "Dark Space (partial) interest" do |k,values|
       proteins = values["Pathway partial-matched Dark Space"].collect{|pair| pair.split(":")}
+      proteins.inject(0){|acc,protein| acc += 1.0 / ((protein_counts[protein] || 0) + 1) }
+    end
+
+    tsv.add_field "Predicted Dark Space interest" do |k,values|
+      proteins = values["Predicted Dark Space"].collect{|pair| pair.split(":")}
       proteins.inject(0){|acc,protein| acc += 1.0 / ((protein_counts[protein] || 0) + 1) }
     end
 
@@ -226,10 +249,6 @@ names(data) <- c('Relevance')
     valid_relevance = ranks.values_at(*valid).collect{|v| v["Relevance"].first.to_f}
     nonvalid_relevance = ranks.values_at(*nonvalid).collect{|v| v["Relevance"].first.to_f}
 
-    iif valid
-    iif valid_relevance.sort
-    iif nonvalid
-    iif nonvalid_relevance.sort
     require 'rbbt/util/R'
     tsv = TSV.setup({}, :key_field => "Statistic", :fields => ["Value"], :type => :single)
     tsv["Valid mean"] = Misc.mean valid_relevance

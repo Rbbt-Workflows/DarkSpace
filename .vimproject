@@ -11,6 +11,7 @@ DarkSpace=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass 
   rbbt=rbbt{
    sources=sources{
     DarkSpace.rb
+    PIPs.rb
    }
    tasks=tasks/DarkSpace{
     basic.rb
