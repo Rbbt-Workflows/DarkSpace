@@ -1,0 +1,122 @@
+---
+title: "Comparison relevance scores rounds 4 and 5"
+output:
+  html_document: default
+---
+
+### Synopsis
+
+Comparison of thedifferences between rounds 4 and 5 of relevance score, to determine how stocastic effects can influence the results. 
+
+#### Libraries
+```{r libraries,message=FALSE,warning=FALSE}
+library(data.table)
+library(splitstackshape)
+library(ggplot2)
+```
+
+### Upload data
+```{r upload,warning=FALSE,message=FALSE}
+dsp_scored_rd4 <- unique(fread("./round4/pmid_ranks.txt",header = T,check.names = T))
+dsp_scored_rd5 <- unique(fread("./round5/pmid_ranks.txt",header = T,check.names = T))
+```
+
+### Select only relevant fields
+```{r select}
+rd4 <- unique(dsp_scored_rd4[,.(
+        pmid = X.PMID,
+        rel_rd4 = Relevance
+)])
+
+rd5 <- unique(dsp_scored_rd5[,.(
+        pmid = X.PMID,
+        rel_rd5 = Relevance
+)])
+```
+
+### Sorting and comparison
+```{r sort_comp}
+rd4 <- rd4[order(-rel_rd4),.(
+        pmid,
+        rel_rd4,
+        order_rd4 = .I
+)]
+rd5 <- rd5[order(-rel_rd5),.(
+        pmid,
+        rel_rd5,
+        order_rd5 = .I
+)]
+
+rel_comp <- unique(merge(
+        rd4,
+        rd5,
+        by="pmid",
+        all=T
+))
+
+rel_comp_long <- melt(
+        rel_comp,
+        id.vars = "pmid",
+        measure.vars = c("rel_rd4","rel_rd5")
+)
+
+rel_comp_sort <- rel_comp[order(order_rd4),.(
+        pmid,
+        rel_rd4,
+        rel_rd5,
+        diff_rel = rel_rd4 - rel_rd5,
+        order_rd4,
+        order_rd5,
+        diff_order = order_rd4 - order_rd5
+)]
+
+
+```
+
+### Visualize differences
+```{r diff_vis_relcomp_1}
+g <- ggplot(rel_comp_long,aes(x=value,fill=variable,alpha=0.2)) + 
+        geom_histogram(position = "identity",bins = 50) + 
+        ggtitle("Relevance score comparison, rounds 4 and 5")
+g
+```
+
+```{r diff_vis_relcomp_2}
+g1 <- ggplot(rel_comp_sort,aes(x=diff_rel)) + 
+        geom_histogram(position = "identity",bins = 1000) + 
+        ggtitle("Difference in score distribution, rounds 4 and 5")
+g1
+```
+
+```{r diff_vis_ordercomp}
+g2 <- ggplot(rel_comp_sort,aes(x=diff_order)) + 
+        geom_histogram(position = "identity",bins = 1000) + 
+        ggtitle("Variations in order, rounds 4 and 5")
+g2
+```
+
+ - Median in order change: `r median(rel_comp_sort$diff_order)`   
+ - Standard deviation in order change: `r sd(rel_comp_sort$diff_order)`  
+ - Mean order change: `r mean(rel_comp_sort$diff_order)` (as expected from stochastic effect)  
+ - Biggest order changes: `r max((rel_comp_sort$diff_order))` (going up in rd5) /  `r min((rel_comp_sort$diff_order))` (going down in rd5)  
+ - Number of extreme changes: `r nrow(rel_comp_sort[abs(rel_comp_sort$diff_order) > 0.10*nrow(rel_comp_sort)])` (Extreme changes defined as those in which the order change is bigger than 10% of the total number of records evaluated)  
+    
+Relevance score seems to be very sensitive to stochastic effects, with a significant amount of records changing ranking position. 
+
+```{r order_change_eff}
+g3 <- ggplot(rel_comp_sort,aes(x=order_rd4,y=abs(diff_rel))) +
+        geom_point(alpha=0.1) +
+        geom_smooth() +
+        ggtitle("Score differences between rounds 4 and 5,\nplotted along sorting order for round 4")
+g3
+
+```
+
+```{r order_change_eff_2}
+g4 <- ggplot(rel_comp_sort[order_rd4<=10000],aes(x=order_rd4,y=abs(diff_rel))) +
+        geom_point(alpha=0.1) +
+        geom_smooth() +
+        ggtitle("Score differences between rounds 4 and 5,\nplotted along sorting order for round 4 (limited to first 10,000 PMIDs)")
+g4
+
+```

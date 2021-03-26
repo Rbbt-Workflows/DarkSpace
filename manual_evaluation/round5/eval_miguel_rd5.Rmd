@@ -1,0 +1,348 @@
+---
+title: "Quick evaluation Miguel scores, round 5"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+### Synopsis
+
+Evaluation of the third round of scoring Miguel Vázquez did for the DSP.
+
+#### Libraries
+```{r libraries,message=FALSE,warning=FALSE}
+dyn.load('/Library/Java/JavaVirtualMachines/jdk1.8.0_161.jdk/Contents/Home/jre/lib/server/libjvm.dylib')
+library(rJava)
+library(data.table)
+library(ggplot2)
+library(xlsx)
+library(gridExtra)
+library(splitstackshape)
+```
+
+### Upload data
+```{r upload,warning=FALSE,message=FALSE}
+dsp_scored_rd1 <- unique(fread("../round1/DarkSpace-v1.txt",sep="\t",header=T,skip=1))
+dsp_scored_rd2 <- unique(data.table(read.xlsx2("../round2/DarkSpace_rank2.xls",sheetIndex=1,header=T,colClasses = c("character","numeric","character","integer","character","numeric","numeric"))))
+dsp_scored_rd3 <- unique(fread("../round3/pmid_ranks.txt",header=T,check.names = T))
+dsp_scored_rd4 <- unique(fread("../round4/pmid_ranks.txt",header = T,check.names = T))
+dsp_scored_rd5 <- unique(fread("./pmid_ranks.txt",header = T,check.names = T))
+```
+
+### Preformat latest evaluation and the one before that
+```{r preformat_data,warning=FALSE,message=FALSE}
+dsp_scored_rd4 <- dsp_scored_rd3[,known:=ifelse(Known.pairs=="",
+                                                "false",
+                                                "true")]
+
+dsp_scored_rd5 <- dsp_scored_rd4[,known:=ifelse(Known.pairs=="",
+                                                "false",
+                                                "true")]
+table(dsp_scored_rd5$known,useNA = "ifany")
+```
+
+### Explore data
+
+I check the distribution of the relevance and the combined score separating IMEx positive and negative publications and comparing the previous iterations with the current one.
+
+#### Relevance score plot
+```{r rel_plot}
+g1 <- ggplot(dsp_scored_rd1,aes(x=Relevance,fill=IMEX))
+g1 <- g1 + geom_histogram(alpha=0.8,position='identity')
+g1 <- g1 + xlab("relevance score")
+g1 <- g1 + ylab("Number of publications")
+g1 <- g1 + ggtitle("Relevance score distribution, round 1")
+#g1 <- g1 + xlim(0.0,2.0)
+g1 <- g1 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g2 <- ggplot(dsp_scored_rd2,aes(x=Relevance,fill=IMEX))
+g2 <- g2 + geom_histogram(alpha=0.8,position='identity')
+g2 <- g2 + xlab("relevance score")
+g2 <- g2 + ylab("Number of publications")
+g2 <- g2 + ggtitle("Relevance score distribution, round 2")
+#g2 <- g2 + xlim(0.0,2.0)
+g2 <- g2 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3 <- ggplot(dsp_scored_rd3,aes(x=Relevance,fill=known))
+g3 <- g3 + geom_histogram(alpha=0.8,position='identity')
+g3 <- g3 + xlab("relevance score")
+g3 <- g3 + ylab("Number of publications")
+g3 <- g3 + ggtitle("Relevance score distribution, round 3")
+g3 <- g3 + scale_x_continuous(breaks=c(0:24))
+g3 <- g3 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g4 <- ggplot(dsp_scored_rd4,aes(x=Relevance,fill=known))
+g4 <- g4 + geom_histogram(alpha=0.8,position='identity')
+g4 <- g4 + xlab("relevance score")
+g4 <- g4 + ylab("Number of publications")
+g4 <- g4 + ggtitle("Relevance score distribution, round 4")
+g4 <- g4 + scale_x_continuous(breaks=c(0:24))
+g4 <- g4 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g5 <- ggplot(dsp_scored_rd5,aes(x=Relevance,fill=known))
+g5 <- g5 + geom_histogram(alpha=0.8,position='identity')
+g5 <- g5 + xlab("relevance score")
+g5 <- g5 + ylab("Number of publications")
+g5 <- g5 + ggtitle("Relevance score distribution, round 5")
+g5 <- g5 + scale_x_continuous(breaks=c(0:24))
+g5 <- g5 + theme(plot.title = element_text(),
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+grid.arrange(g1, g2, g3, g4, g5, ncol=1)
+```
+
+```{r rel_plot_v2,fig.height=7,fig.width=7}
+g1.1 <- ggplot(dsp_scored_rd1,aes(x=Relevance,fill=IMEX))
+g1.1 <- g1.1 + geom_density(alpha=0.8,position='identity')
+g1.1 <- g1.1 + xlab("")
+g1.1 <- g1.1 + ylab("")
+g1.1 <- g1.1 + ggtitle("Relevance score distribution, round 1")
+#g1.1 <- g1.1 + xlim(0.0,2.0)
+g1.1 <- g1.1 + ylim(0,5)
+g1.1 <- g1.1 + theme(plot.title = element_text(),
+               legend.position = "none",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g2.1 <- ggplot(dsp_scored_rd2,aes(x=Relevance,fill=IMEX))
+g2.1 <- g2.1 + geom_density(alpha=0.8,position='identity')
+g2.1 <- g2.1 + xlab("")
+g2.1 <- g2.1 + ylab("")
+g2.1 <- g2.1 + ggtitle("Relevance score distribution, round 2")
+#g2.1 <- g2.1 + xlim(0.0,2.0)
+g2.1 <- g2.1 + ylim(0,5)
+g2.1 <- g2.1 + theme(plot.title = element_text(),
+               legend.position = "none",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g3.1 <- ggplot(dsp_scored_rd3,aes(x=Relevance,fill=known))
+g3.1 <- g3.1 + geom_density(alpha=0.8,position='identity')
+g3.1 <- g3.1 + xlab("")
+g3.1 <- g3.1 + ylab("Number of publications")
+g3.1 <- g3.1 + ggtitle("Relevance score distribution, round 3")
+g3.1 <- g3.1 + scale_x_continuous(breaks=c(0:24))
+g3.1 <- g3.1 + theme(plot.title = element_text(),
+               legend.position = "none",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g4.1 <- ggplot(dsp_scored_rd4,aes(x=Relevance,fill=known))
+g4.1 <- g4.1 + geom_density(alpha=0.8,position='identity')
+g4.1 <- g4.1 + xlab("relevance score")
+g4.1 <- g4.1 + ylab("")
+g4.1 <- g4.1 + ggtitle("Relevance score distribution, round 4")
+g4.1 <- g4.1 + scale_x_continuous(breaks=c(0:24))
+g4.1 <- g4.1 + theme(plot.title = element_text(),
+               legend.position = "none",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g5.1 <- ggplot(dsp_scored_rd5,aes(x=Relevance,fill=known))
+g5.1 <- g5.1 + geom_density(alpha=0.8,position='identity')
+g5.1 <- g5.1 + xlab("relevance score")
+g5.1 <- g5.1 + ylab("Number of publications")
+g5.1 <- g5.1 + ggtitle("Relevance score distribution, round 5")
+g5.1 <- g5.1 + scale_x_continuous(breaks=c(0:24))
+g5.1 <- g5.1 + theme(plot.title = element_text(),
+               legend.position = "bottom",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+grid.arrange(g1.1, g2.1, g3.1, g4.1, g5.1, ncol=1, heights = c(1.1,1.2,1.5,2,2.5))
+```
+
+The re-calculated score is distributed very similarly to the previous instance. I decide to manually evaluate slices of the distribution, to see whether the score correlates with uncurated interaction papers.
+
+#### Explore manually evaluated subset
+
+Manual evaluation of 90 scored papers can be found in the file 'eval_miguel_rd5.xlsx'. From an initial overview it seems the score does not perform as nicely as in previous implementations. 
+
+I have a closer look, taking into account the origin of the data and comparing with previous version of the score. 
+
+##### Upload manual evaluation
+```{r explore_manual_eval}
+manual <- fread("./manual.txt",header = T)
+
+manual$pmid <- as.character(manual$pmid)
+manual$id <- manual[,.(.I)]
+```
+
+##### Obtain DSP comparison table for reference
+I will take the table that does the comparison at the publication level only for this comparison. 
+```{r dsp_comp_download,warning=FALSE,message=FALSE}
+if(!exists("dsp_pubcomp")){
+        setwd("~/Documents/Projects/dsp/darkspaceproject/dsp_comparison/results/")
+        dsp_pubcompNames = fread('cat pubcomp_table_final.txt.gz | gunzip | head -n 1')[, colnames(.SD)]
+        dsp_pubcomp = fread('cat pubcomp_table_final.txt.gz | gunzip | grep -v "^Day"')
+        setnames(dsp_pubcomp, dsp_pubcompNames)
+        setwd("~/Documents/Projects/dsp/DarkSpace/manual_evaluation/round2/")
+}
+```
+
+##### Merge origin into manual evaluation
+```{r explore_manual_eval_2}
+manual_ori <- data.table(unique(merge(manual,dsp_pubcomp,by="pmid",all.x=T,all.y=F)))
+manual_ori <- manual_ori[order(id)]
+
+fwrite(manual_ori,"./manual_ori.txt",col.names = T,row.names = F,quote=F,sep="\t")
+```
+
+##### Plot manual evaluation
+```{r plot_man_eval,fig.height=7,fig.width=10}
+manual_ori_sel <- unique(manual_ori[,.(pmid,
+                                        relevance,
+                                        contains_interactions,
+                                        id,
+                                        tm_epmc = ifelse(tm_epmc=="1",
+                                                         "tm_epmc",
+                                                         "0"),
+                                        EVEX = ifelse(EVEX=="1",
+                                                         "EVEX",
+                                                         "0"),
+                                        reactome = ifelse(reactome=="1",
+                                                         "reactome",
+                                                         "0"),
+                                        OP_int =  ifelse(OmniPath_interactions=="1",
+                                                         "OP_int",
+                                                         "0"),
+                                        OP_ptm =  ifelse(OmniPath_ptm=="1",
+                                                         "OP_ptm",
+                                                         "0")),
+                                    round])
+
+manual_ori_sel_long <- reshape(manual_ori_sel,direction="long",v.names="origin",varying=c("tm_epmc","EVEX","reactome","OP_int","OP_ptm"))
+manual_ori_sel_long <- unique(manual_ori_sel_long[order(id,-origin),.(id,
+                                                             pmid,
+                                                             relevance,
+                                                             contains_interactions,
+                                                             origin,
+                                                             round,
+                                                             select="yes")])
+
+
+for (i in 2:nrow(manual_ori_sel_long)){
+        if(manual_ori_sel_long[i,]$pmid == manual_ori_sel_long[i-1,]$pmid & manual_ori_sel_long[i,]$origin=="0"){
+                manual_ori_sel_long[i,]$select <- "no"
+        }
+        
+}
+
+manual_ori_sel_long <- manual_ori_sel_long[select=="yes"]
+
+manual_ori_sel_long_simple <- manual_ori_sel_long[,.(id,
+                                              pmid,
+                                              relevance,
+                                              contains_interactions = ifelse(grepl("no",contains_interactions),
+                                                                             "no",
+                                                                             "yes"),
+                                              origin,
+                                              round,
+                                              select)]
+
+g6.1 <- ggplot(manual_ori_sel_long_simple[round=="rd1"],aes(x=relevance,fill=contains_interactions))
+g6.1 <- g6.1 + geom_density(alpha=0.8,position='identity')
+g6.1 <- g6.1 + xlab("")
+g6.1 <- g6.1 + ylab("")
+g6.1 <- g6.1 + ggtitle("Manual evaluation by relevance score, round 1")
+g6.1 <- g6.1 + theme(plot.title = element_text(),
+               legend.position = "none",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g6.2 <- ggplot(manual_ori_sel_long_simple[round=="rd2"],aes(x=relevance,fill=contains_interactions))
+g6.2 <- g6.2 + geom_density(alpha=0.8,position='identity')
+g6.2 <- g6.2 + xlab("")
+g6.2 <- g6.2 + ylab("")
+g6.2 <- g6.2 + ggtitle("Manual evaluation by relevance score, round 2")
+g6.2 <- g6.2 + theme(plot.title = element_text(),
+               legend.position = "none",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g6.3 <- ggplot(manual_ori_sel_long_simple[round=="rd3"],aes(x=relevance,fill=contains_interactions))
+g6.3 <- g6.3 + geom_density(alpha=0.8,position='identity')
+g6.3 <- g6.3 + xlab("")
+g6.3 <- g6.3 + ylab("Number of publications")
+g6.3 <- g6.3 + ggtitle("Manual evaluation by relevance score, round 3")
+g6.3 <- g6.3 + theme(plot.title = element_text(),
+               legend.position = "none",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g6.4 <- ggplot(manual_ori_sel_long_simple[round=="rd4"],aes(x=relevance,fill=contains_interactions))
+g6.4 <- g6.4 + geom_density(alpha=0.8,position='identity')
+g6.4 <- g6.4 + xlab("relevance score")
+g6.4 <- g6.4 + ylab("")
+g6.4 <- g6.4 + ggtitle("Manual evaluation by relevance score, round 4")
+g6.4 <- g6.4 + theme(plot.title = element_text(),
+               legend.position = "none",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+g6.5 <- ggplot(manual_ori_sel_long_simple[round=="rd5"],aes(x=relevance,fill=contains_interactions))
+g6.5 <- g6.5 + geom_density(alpha=0.8,position='identity')
+g6.5 <- g6.5 + xlab("relevance score")
+g6.5 <- g6.5 + ylab("")
+g6.5 <- g6.5 + ggtitle("Manual evaluation by relevance score, round 5")
+g6.5 <- g6.5 + theme(plot.title = element_text(),
+               legend.position = "bottom",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+
+grid.arrange(g6.1, g6.2, g6.3, g6.4, g6.5, ncol=1, heights = c(1.1,1.2,1.5,1.5,2))
+```
+
+###### Plot manual evalutation by data source
+```{r, fig.height=6,fig.width=6}
+g6 <- ggplot(manual_ori_sel_long_simple,aes(x=relevance,fill=contains_interactions))
+g6 <- g6 + geom_histogram(alpha=0.8,position='stack', bins = 15)
+g6 <- g6 + xlab("relevance score")
+g6 <- g6 + ylab("Number of publications")
+g6 <- g6 + ggtitle("Manual evaluation by relevance score and round")
+g6 <- g6 + facet_grid(origin~round,scales="free")
+g6 <- g6 + theme(plot.title = element_text(),
+               legend.position = "bottom",
+               panel.grid.major = element_blank(),
+               panel.grid.minor = element_blank(),
+               panel.background = element_blank())
+g6
+
+```
+
+
+Numbers are a bit low to draw final conclusions, but it seems that the fourth iteration of the relevance score can distinguish between papers containing interaction data regardless of the origin of the data. The fifth iteration, however, does not distinguish the positive vs the negative as well as the fourth. 
+
+We can use this iteration as input for the DSP curation pipeline. 
+
+#### Estimating size to curate (according to 5th iteration)
+
+```{r summ_stat}
+median(dsp_scored_rd5$Relevance)
+mean(dsp_scored_rd5$Relevance)
+```
+We assume a % of true positives of around 90% for those publications with a relevance score >6.5 (`r nrow(dsp_scored_rd5[Relevance>6.5])` publications, `r round(nrow(dsp_scored_rd5[Relevance>6.5])*.9)` estimated true positives). Considering also those below that score, and estimating a true positive rate of 40%, that adds `r round(nrow(dsp_scored_rd5[Relevance<6.5])*.4)` potentially positive publications below 6.5. Total number of potentially positive publications is `r round(nrow(dsp_scored_rd5[Relevance>6.5])*0.9 + nrow(dsp_scored_rd5[Relevance<=6.5])*.4)`.
